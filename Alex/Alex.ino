@@ -164,22 +164,36 @@ void enablePullups()
   // Use bare-metal to enable the pull-up resistors on pins
   // 2 and 3. These are pins PD2 and PD3 respectively.
   // We set bits 2 and 3 in DDRD to 0 to make them inputs. 
-  
+  DDRD &= 0b11110011;
+  PORTD |= 0b00001100;
 }
 
+
+typedef enum {
+  STOP = 0,
+  FORWARD = 1,
+} TDirection;
+
+volatile TDirection dir = STOP;
+
+}
 // Functions to be called by INT0 and INT1 ISRs.
 void leftISR()
 {
-  leftTicks++;
-  Serial.print("LEFT: ");
-  Serial.println(leftTicks);
+  if (dir == FORWARD){
+   leftTicks++;
+   forwardDist = (unsigned long) ((float)leftTicks / COUNTS_PER_REV * WHEEL_CIRC);
+  //Serial.print("LEFT: ");
+  //Serial.println(leftTicks);
 }
 
 void rightISR()
 {
-  rightTicks++;
-  Serial.print("RIGHT: ");
-  Serial.println(rightTicks);
+  if (dir == FORWARD){
+    rightTicks++;
+    forwardDist = (unsigned long) ((float)rightTicks / COUNTS_PER_REV * WHEEL_CIRC);
+  //Serial.print("RIGHT: ");
+  //Serial.println(rightTicks);
 }
 
 // Set up the external interrupt pins INT0 and INT1
@@ -189,15 +203,21 @@ void setupEINT()
   // Use bare-metal to configure pins 2 and 3 to be
   // falling edge triggered. Remember to enable
   // the INT0 and INT1 interrupts.
+  EIMSK = 0b11;
+  EICRA = 0b1010;
 }
 
 // Implement the external interrupt ISRs below.
 // INT0 ISR should call leftISR while INT1 ISR
 // should call rightISR.
-
-
-
-
+ISR(INT0_vect)
+{
+  leftISR();
+}
+ISR(INT1_vect)
+{
+  rightISR();
+}
 // Implement INT0 and INT1 ISRs above.
 
 /*
@@ -263,6 +283,10 @@ void setupMotors()
    *    B1IN - Pin 10, PB2, OC1B
    *    B2In - pIN 11, PB3, OC2A
    */
+   pinMode(RR, OUTPUT);
+   pinMode(RF, OUTPUT);
+   pinMode(LF, OUTPUT);
+   pinMode(LR, OUTPUT);
 }
 
 // Start the PWM for Alex's motors.
@@ -301,6 +325,7 @@ void forward(float dist, float speed)
   // LF = Left forward pin, LR = Left reverse pin
   // RF = Right forward pin, RR = Right reverse pin
   // This will be replaced later with bare-metal code.
+  dir = FORWARD;
   
   analogWrite(LF, val);
   analogWrite(RF, val);
@@ -372,6 +397,7 @@ void right(float ang, float speed)
 // Stop Alex. To replace with bare-metal code later.
 void stop()
 {
+  dir = STOP;
   analogWrite(LF, 0);
   analogWrite(LR, 0);
   analogWrite(RF, 0);
@@ -532,7 +558,7 @@ void loop() {
 
 // Uncomment the code below for Step 2 of Activity 3 in Week 8 Studio 2
 
-// forward(0, 100);
+forward(0, 100);
 
 // Uncomment the code below for Week 9 Studio 2
 
