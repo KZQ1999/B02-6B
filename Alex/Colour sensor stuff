@@ -1,0 +1,45 @@
+#include <Adafruit_TCS34725.h>
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_700MS, TCS34725_GAIN_1X);
+
+uint16_t r, g, b, c;
+
+//unint16_t red[3] = {x, x, x};
+//unint16_t green[3] = {x, x, x};
+
+
+//Read RGB values, process and send message back on what colour is identified
+void getColour() 
+{
+  digitalWrite(LEDPIN, HIGH); //turn on the LED
+  delay(10); 
+  tcs.getRawData(&r, &g, &b, &c); //take readings
+  delay(10);
+  digitalWrite(LEDPIN, LOW);
+  /* process and return the colour:
+  int colour = processColour(r, g, b);
+  if (colour == 1)
+  {
+    sendMessage("red");
+  }
+  else 
+  {
+    sendMessage("green");
+  } */
+}
+
+/* Calculate euclidean colour distance between red and green values. Colour with lower distance will be the identified colour.
+ * return 1 means red, return 0 means green
+int processColour(int r, int g, int b)
+{
+  int redDist = square(r - red[0]) + square(g - red[1]) + square(b - red[2]);
+  int greenDist = square(r - green[0]) + square(g - green[1]) + square(b - green[2]);
+  if (greenDist > redDist)
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  } 
+}
+*/
