@@ -23,13 +23,13 @@
 #include <Adafruit_TCS34725.h>
 #include <MPU6050_tockn.h>
 
-//#define PI 3.141592654
 #define offSet 22
 #define rightOffset 35
 #define LEDPIN 8
 
 MPU6050 mpu6050(Wire);
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_700MS, TCS34725_GAIN_1X);
+
 typedef enum {
   STOP = 0,
   FORWARD = 1,
@@ -49,13 +49,11 @@ uint16_t green[3] = {0, 0, 0};
 
 // Number of ticks per revolution from the
 // wheel encoder.
-
 #define COUNTS_PER_REV      195
 
 // Wheel circumference in cm.
 // We will use this to calculate forward/backward distance traveled
 // by taking revs * WHEEL_CIRC
-
 #define WHEEL_CIRC          22
 
 // Motor control pins. You need to adjust these till
@@ -65,20 +63,17 @@ uint16_t green[3] = {0, 0, 0};
 #define RF                  10  // Right forward pin
 #define RR                  11  // Right reverse pin
 
-// Multiplier for weaker left motor. LF & LR refer to RIGHT WHEEL and vice-versa.
+// Multiplier for weaker right motor.
 float RMUL = 1.2;
 
 /*
       Alex's State Variables
 */
-
-
 volatile unsigned long leftForwardTicks;
 volatile unsigned long rightForwardTicks;
 volatile unsigned long leftReverseTicks;
 volatile unsigned long rightReverseTicks;
 
-//Left and right encoders ticks for turning
 volatile unsigned long leftForwardTicksTurns;
 volatile unsigned long rightForwardTicksTurns;
 volatile unsigned long leftReverseTicksTurns;
@@ -268,12 +263,13 @@ ISR(INT1_vect)
 {
   rightISR();
 }
-// Implement INT0 and INT1 ISRs above.
+
 
 /*
    Setup and start codes for serial communications
 */
-// Set up the serial conewDist = forwardDist + deltaDist;nnection. For now we are using
+
+// Set up the serial connection. For now we are using
 // Arduino Wiring, you will replace this later
 // with bare-metal code.
 void setupSerial()
