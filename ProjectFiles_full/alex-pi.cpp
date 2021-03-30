@@ -44,6 +44,7 @@ void handleStatus(TPacket *packet)
 	printf("Right Reverse Ticks Turns:\t%d\n", packet->params[7]);
 	printf("Forward Distance:\t\t%d\n", packet->params[8]);
 	printf("Reverse Distance:\t\t%d\n", packet->params[9]);
+	printf("Colour Code:\t\t%d\n", packet->params[10]);
 	printf("\n---------------------------------------\n\n");
 }
 
