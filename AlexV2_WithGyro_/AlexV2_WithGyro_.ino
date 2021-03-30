@@ -1,4 +1,3 @@
-
 /*
   #include <FileIO.h>
   #include <BridgeSSLClient.h>
@@ -24,7 +23,7 @@
 #include <MPU6050_tockn.h>
 
 #define offSet 22
-#define rightOffset 35
+#define rightOffSet 35
 #define LEDPIN 8
 
 MPU6050 mpu6050(Wire);
@@ -49,7 +48,7 @@ uint16_t green[3] = {0, 0, 0};
 
 // Number of ticks per revolution from the
 // wheel encoder.
-#define COUNTS_PER_REV      195
+#define COUNTS_PER_REV      190
 
 // Wheel circumference in cm.
 // We will use this to calculate forward/backward distance traveled
@@ -69,6 +68,9 @@ float RMUL = 1.2;
 /*
       Alex's State Variables
 */
+volatile unsigned long leftTicks;
+volatile unsigned long rightTicks;
+
 volatile unsigned long leftForwardTicks;
 volatile unsigned long rightForwardTicks;
 volatile unsigned long leftReverseTicks;
@@ -90,6 +92,7 @@ volatile unsigned long reverseDist;
 
 unsigned long deltaDist;
 unsigned long newDist;
+unsigned long colourcode;
 
 /*
    Alex Communication Routines.
@@ -131,6 +134,7 @@ void sendStatus()
   statusPacket.params[7] = rightReverseTicksTurns;
   statusPacket.params[8] = forwardDist;
   statusPacket.params[9] = reverseDist;
+  statusPacket.params[10] = colourcode;
   sendResponse(&statusPacket);
 }
 
@@ -392,7 +396,7 @@ void reverse(float dist, float speed)
     deltaDist = 9999999;
   }
 
-  newDist = forwardDist + deltaDist;
+  newDist = reverseDist + deltaDist;
 
   // LF = Left forward pin, LR = Left reverse pin
   // RF = Right forward pin, RR = Right reverse pin
@@ -411,7 +415,15 @@ void left(float ang, float speed)
   int val = pwmVal(speed);
   mpu6050.update();
   float curr = mpu6050.getAngleZ();
-  float target = curr + (ang - offSet); //may need to tune the angle for target to account for momentum
+  float target;
+  if (ang == 90)
+  {
+     target = curr + (ang - offSet); //may need to tune the angle for target to account for momentum
+  }
+  if (ang == 45)
+  {
+     target = curr + (ang - 0);
+  }
   while (curr < target)
   {
     mpu6050.update();
@@ -432,7 +444,15 @@ void right(float ang, float speed)
   int val = pwmVal(speed);
   mpu6050.update();
   float curr = mpu6050.getAngleZ();
-  float target = curr - (ang - rightOffset); //may need to tune the angle for target to account for momentum
+  float target;
+  if (ang == 90)
+  {
+     target = curr + (ang - rightOffSet); //may need to tune the angle for target to account for momentum
+  }
+  if (ang == 45)
+  {
+     target = curr + (ang - 0);
+  }
   while (curr > target)
   {
     mpu6050.update();
@@ -580,15 +600,7 @@ void getColor()
   delay(10);
   digitalWrite(LEDPIN, LOW);
 
-  int colour = processColor(r, g, b);
-  if (colour == 1) 
-  {
-    //
-  }
-  else 
-  {
-    //
-  }
+  colourcode = processColor(r, g, b);
 }
 
 int processColor(int r, int g, int b)
@@ -692,4 +704,3 @@ void loop() {
     sendBadChecksum();
   }
 }
-
